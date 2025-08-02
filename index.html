@@ -11,6 +11,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Workout Tracker">
     
+    <!-- App Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9IiM2MzY2ZjEiLz4KPHN2ZyB4PSI0NSIgeT0iNjAiIHdpZHRoPSI5MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDI1NiAyNTYiIGZpbGw9IndoaXRlIj4KPHA+CjxwYXRoIGQ9Ik0yNDgsMTIwaC04Vjg4YTE2LDE2LDAsMCwwLTE2LTE2SDIwOFY2NGExNiwxNiwwLDAsMC0xNi0xNkgxNjhhMTYsMTYsMCwwLDAtMTYsMTZ2NTZIMTA0VjY0QTE2LDE2LDAsMCwwLDg4LDQ4SDY0QTE2LDE2LDAsMCwwLDQ4LDY0djhIMzJBMTYsMTYsMCwwLDAsMTYsODh2MzJIOGE4LDgsMCwwLDAsMCwxNmg4djMyYTE2LDE2LDAsMCwwLDE2LDE2SDQ4djhhMTYsMTYsMCwwLDAsMTYsMTZIODhhMTYsMTYsMCwwLDAsMTYtMTZWMTM2aDQ4djU2YTE2LDE2LDAsMCwwLDE2LDE2aDI0YTE2LDE2LDAsMCwwLDE2LTE2di04aDE2YTE2LDE2LDAsMCwwLDE2LTE2VjEzNmg4YTgsOCwwLDAsMCwwLTE2Wk0zMiwxNjhWODhINDh2ODBabTU2LDI0SDY0VjY0SDg4VjE5MlptMTA0LDBIMTY4VjY0aDI0VjE3NS44MmMwLC4wNiwwLC4xMiwwLC4xOHMwLC4xMiwwLC4xOFYxOTJabTMyLTI0SDIwOFY4OGgxNloiLz4KPC9wPgo8L3N2Zz4KPC9zdmc+">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzYzNjZmMSIvPgo8c3ZnIHg9IjgiIHk9IjEwIiB3aWR0aD0iMTYiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAyNTYgMjU2IiBmaWxsPSJ3aGl0ZSI+CjxwYXRoIGQ9Ik0yNDgsMTIwaC04Vjg4YTE2LDE2LDAsMCwwLTE2LTE2SDIwOFY2NGExNiwxNiwwLDAsMC0xNi0xNkgxNjhhMTYsMTYsMCwwLDAtMTYsMTZ2NTZIMTA0VjY0QTE2LDE2LDAsMCwwLDg4LDQ4SDY0QTE2LDE2LDAsMCwwLDQ4LDY0djhIMzJBMTYsMTYsMCwwLDAsMTYsODh2MzJIOGE4LDgsMCwwLDAsMCwxNmg4djMyYTE2LDE2LDAsMCwwLDE2LDE2SDQ4djhhMTYsMTYsMCwwLDAsMTYsMTZIODhhMTYsMTYsMCwwLDAsMTYtMTZWMTM2aDQ4djU2YTE2LDE2LDAsMCwwLDE2LDE2aDI0YTE2LDE2LDAsMCwwLDE2LTE2di04aDE2YTE2LDE2LDAsMCwwLDE2LTE2VjEzNmg4YTgsOCwwLDAsMCwwLTE2Wk0zMiwxNjhWODhINDh2ODBabTU2LDI0SDY0VjY0SDg4VjE5MlptMTA0LDBIMTY4VjY0aDI0VjE3NS44MmMwLC4wNiwwLC4xMiwwLC4xOHMwLC4xMiwwLC4xOFYxOTJabTMyLTI0SDIwOFY4OGgxNloiLz4KPC9zdmc+Cjwvc3ZnPgo=">
+    
     <!-- PWA Manifest -->
     <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiV29ya291dCBUcmFja2VyIiwic2hvcnRfbmFtZSI6IldvcmtvdXQiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJ0aGVtZV9jb2xvciI6IiM2MzY2ZjEiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2ZmZmZmZiIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUIzYVdSMGFEMGlNakEwSWlCb1pXbG5hSFE5SWpJd05DSWdkbWxsZDBKdmVEMGlNQ0F3SURJME5DQXlOREFpSUdacGJHdzlJaU5qWkRFME1qWWlQanh5WldOMElIZzlJalkwSWlCNVBTSTJOQ0lnZDJsa2RHZzlJakUyTUNJZ2FHVnBaMmgwUFNJeE5qQWlJSEo0UFNJNElpQm1hV3hzUFNJak5qTTJObVl4SWk4K1BIUmxlSFFnZUQwaU1URXlJaUI1UFNJeE5qQWlJSFJoZVMxaGJtTm9iM0k5SW0xcFpHUnNaU0lnWm1sc2JEMGlJM1ptWm1abVppSWdabTl1ZEMxemFYcGxQU0l5TkNJZ1ptOXVkQzEzWldsbmFIUTlJbUp2YkdRaVBqa3VNVHc2ZEdWNGRENGdkRzlzYVdObGJqd3ZkR1Y0ZEQ0OEwzTjJaejRnIiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
     
@@ -358,14 +362,18 @@
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 8px;
+            width: 100%;
         }
 
         .set-input {
-            padding: 8px;
+            padding: 12px 8px;
             border: 1px solid #e2e8f0;
             border-radius: 4px;
             text-align: center;
             font-size: 16px;
+            width: 100%;
+            min-width: 0; /* Prevents inputs from growing beyond container */
+            box-sizing: border-box;
         }
 
         .last-week-info {
