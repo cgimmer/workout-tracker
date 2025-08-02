@@ -1151,9 +1151,50 @@
             showLogScreen();
         }
 
-        function sendToGoogleSheets(completedWorkout) {
-            // Placeholder for Google Sheets integration
-            console.log('Sending to Google Sheets:', completedWorkout);
+        // Google Sheets Integration
+        let isGoogleSignedIn = false;
+        let googleAuth = null;
+
+        // Initialize Google API
+        function initGoogleAPI() {
+            gapi.load('auth2', () => {
+                googleAuth = gapi.auth2.init({
+                    client_id: 'YOUR_GOOGLE_CLIENT_ID', // You'll need to replace this
+                    scope: 'https://www.googleapis.com/auth/spreadsheets'
+                });
+                
+                // Check if user is already signed in
+                if (googleAuth.isSignedIn.get()) {
+                    isGoogleSignedIn = true;
+                    console.log('User already signed in to Google');
+                }
+            });
+        }
+
+        // Sign in to Google
+        async function signInToGoogle() {
+            try {
+                if (!googleAuth) {
+                    console.error('Google Auth not initialized');
+                    return false;
+                }
+                
+                if (!isGoogleSignedIn) {
+                    await googleAuth.signIn();
+                    isGoogleSignedIn = true;
+                    console.log('Successfully signed in to Google');
+                }
+                return true;
+            } catch (error) {
+                console.error('Google sign-in failed:', error);
+                return false;
+            }
+        }
+
+        // Send workout data to Google Sheets
+        async function sendToGoogleSheets(completedWorkout) {
+            // For now, just log the data - we'll set up the actual integration next
+            console.log('Would send to Google Sheets:', completedWorkout);
             
             // Format data for sheets
             const sheetData = [];
@@ -1162,16 +1203,19 @@
                 const weights = exercise.sets.map(s => s.weight).join(', ');
                 const rirs = exercise.sets.map(s => s.rir).join(', ');
                 
-                sheetData.push({
-                    date: completedWorkout.date,
-                    exercise: exercise.name,
-                    reps: reps,
-                    weight: weights,
-                    rir: rirs
-                });
+                sheetData.push([
+                    completedWorkout.date,
+                    exercise.name,
+                    reps,
+                    weights,
+                    rirs
+                ]);
             });
             
             console.log('Formatted for sheets:', sheetData);
+            
+            // TODO: Replace with actual Google Sheets API call
+            // For now, we'll set up the Apps Script integration
         }
 
         function viewCompletedWorkout(completed) {
