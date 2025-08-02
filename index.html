@@ -213,20 +213,27 @@
             cursor: pointer;
             color: #64748b;
             transition: color 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
         }
 
         .nav-item.active {
             color: #6366f1;
         }
 
-        .nav-item span {
-            display: block;
-            font-size: 24px;
-            margin-bottom: 4px;
+        .nav-item .nav-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .nav-item small {
             font-size: 12px;
+            font-weight: 500;
         }
 
         .week-nav {
@@ -528,11 +535,22 @@
         <!-- Bottom Navigation -->
         <div class="bottom-nav">
             <div class="nav-item" onclick="showLogScreen()">
-                <span>📅</span>
+                <div class="nav-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </div>
                 <small>Log</small>
             </div>
             <div class="nav-item active" onclick="showProgramScreen()">
-                <span>🏋️</span>
+                <div class="nav-icon">
+                    <svg width="24" height="24" viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="0">
+                        <path d="M248,120h-8V88a16,16,0,0,0-16-16H208V64a16,16,0,0,0-16-16H168a16,16,0,0,0-16,16v56H104V64A16,16,0,0,0,88,48H64A16,16,0,0,0,48,64v8H32A16,16,0,0,0,16,88v32H8a8,8,0,0,0,0,16h8v32a16,16,0,0,0,16,16H48v8a16,16,0,0,0,16,16H88a16,16,0,0,0,16-16V136h48v56a16,16,0,0,0,16,16h24a16,16,0,0,0,16-16v-8h16a16,16,0,0,0,16-16V136h8a8,8,0,0,0,0-16ZM32,168V88H48v80Zm56,24H64V64H88V192Zm104,0H168V64h24V175.82c0,.06,0,.12,0,.18s0,.12,0,.18V192Zm32-24H208V88h16Z" fill="currentColor"/>
+                    </svg>
+                </div>
                 <small>Program</small>
             </div>
         </div>
@@ -599,10 +617,10 @@
         }
 
         function showWorkoutForm(workout = null) {
-            currentWorkout = workout;
             showScreen('workout-form-screen');
             
             if (workout) {
+                currentWorkout = { ...workout }; // Create a copy
                 document.getElementById('workout-form-title').textContent = workout.name;
                 document.getElementById('workout-name').value = workout.name;
                 document.getElementById('workout-day').value = workout.day;
@@ -628,6 +646,7 @@
             } else {
                 document.getElementById('exercise-form-title').textContent = 'Add Exercise';
                 document.getElementById('exercise-form').reset();
+                currentExercise = null;
             }
         }
 
@@ -698,6 +717,13 @@
                 currentWorkout.exercises.push(exercise);
             }
 
+            // Preserve the form values when returning to workout form
+            const workoutName = document.getElementById('workout-name').value;
+            const workoutDay = document.getElementById('workout-day').value;
+            
+            currentWorkout.name = workoutName;
+            currentWorkout.day = workoutDay;
+
             showWorkoutForm(currentWorkout);
         }
 
@@ -752,11 +778,15 @@
             const dayOfWeek = today.getDay(); // 0 = Sunday
             currentWeekStart = new Date(today);
             currentWeekStart.setDate(today.getDate() - dayOfWeek);
+            // Reset time to midnight to avoid timezone issues
+            currentWeekStart.setHours(0, 0, 0, 0);
             updateWeekDisplay();
         }
 
         function changeWeek(direction) {
             currentWeekStart.setDate(currentWeekStart.getDate() + (direction * 7));
+            // Ensure we maintain midnight time
+            currentWeekStart.setHours(0, 0, 0, 0);
             updateWeekDisplay();
             renderLog();
         }
@@ -786,22 +816,32 @@
             
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             
-            days.forEach((day, index) => {
+            // Get current week's date range for comparison
+            const weekStart = new Date(currentWeekStart);
+            const weekEnd = new Date(currentWeekStart);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+            const weekStartString = weekStart.toISOString().split('T')[0];
+            const weekEndString = weekEnd.toISOString().split('T')[0];
+            
+            days.forEach((day, dayIndex) => {
                 const workout = workouts.find(w => w.day === day);
                 if (workout) {
-                    const currentDate = new Date(currentWeekStart);
-                    currentDate.setDate(currentWeekStart.getDate() + index);
+                    // Calculate the correct date for this day of the week
+                    const workoutDate = new Date(currentWeekStart);
+                    workoutDate.setDate(currentWeekStart.getDate() + dayIndex);
+                    workoutDate.setHours(0, 0, 0, 0); // Reset time to midnight
                     
-                    // Check if already completed this week
-                    const isCompleted = completedWorkouts.some(cw => 
+                    // Check if this workout was completed ANYWHERE in this week (not just on the scheduled day)
+                    const isCompletedThisWeek = completedWorkouts.some(cw => 
                         cw.workoutId === workout.id && 
-                        new Date(cw.date).toDateString() === currentDate.toDateString()
+                        cw.date >= weekStartString && 
+                        cw.date <= weekEndString
                     );
                     
-                    if (!isCompleted) {
+                    if (!isCompletedThisWeek) {
                         const item = document.createElement('div');
                         item.className = 'workout-item';
-                        item.onclick = () => startWorkoutEntry(workout, currentDate);
+                        item.onclick = () => startWorkoutEntry(workout, workoutDate);
                         
                         item.innerHTML = `
                             <div class="workout-info">
@@ -829,9 +869,12 @@
             const weekEnd = new Date(currentWeekStart);
             weekEnd.setDate(weekEnd.getDate() + 6);
             
+            // Convert to date strings for comparison
+            const weekStartString = weekStart.toISOString().split('T')[0];
+            const weekEndString = weekEnd.toISOString().split('T')[0];
+            
             const thisWeekCompleted = completedWorkouts.filter(cw => {
-                const date = new Date(cw.date);
-                return date >= weekStart && date <= weekEnd;
+                return cw.date >= weekStartString && cw.date <= weekEndString;
             });
             
             thisWeekCompleted.forEach(completed => {
@@ -841,7 +884,8 @@
                     item.className = 'workout-item';
                     item.onclick = () => viewCompletedWorkout(completed);
                     
-                    const date = new Date(completed.date);
+                    // Parse the date properly
+                    const date = new Date(completed.date + 'T00:00:00');
                     const dateStr = date.toLocaleDateString('en-US', { 
                         weekday: 'long', 
                         month: 'short', 
@@ -871,10 +915,11 @@
             currentLogEntry = {
                 workout: workout,
                 date: date,
+                completedWorkoutId: null, // This is a new workout entry
                 exercises: workout.exercises.map(ex => ({
                     ...ex,
                     completed: false,
-                    sets: []
+                    loggedSets: []
                 }))
             };
             
@@ -894,10 +939,10 @@
                 item.onclick = () => showSetModal(exercise, index);
                 
                 let displayText;
-                if (exercise.completed && exercise.sets.length > 0) {
-                    const reps = exercise.sets.map(s => s.reps).join(', ');
-                    const weights = exercise.sets.map(s => s.weight).join(', ');
-                    const rirs = exercise.sets.map(s => s.rir).join('/');
+                if (exercise.completed && exercise.loggedSets && exercise.loggedSets.length > 0) {
+                    const reps = exercise.loggedSets.map(s => s.reps).join(', ');
+                    const weights = exercise.loggedSets.map(s => s.weight).join(', ');
+                    const rirs = exercise.loggedSets.map(s => s.rir).join('/');
                     displayText = `${reps} x ${weights} lbs, ${rirs} RIR`;
                 } else {
                     displayText = `${exercise.sets} sets | ${exercise.reps} reps | ${exercise.rir} RIR`;
@@ -919,11 +964,13 @@
         function showSetModal(exercise, exerciseIndex) {
             const modal = document.getElementById('set-modal');
             document.getElementById('set-modal-title').textContent = exercise.name;
+            modal.setAttribute('data-exercise-index', exerciseIndex);
             
             // Initialize sets if not already done
-            if (exercise.sets.length === 0) {
+            if (!exercise.loggedSets || exercise.loggedSets.length === 0) {
+                exercise.loggedSets = [];
                 for (let i = 0; i < exercise.sets; i++) {
-                    exercise.sets.push({
+                    exercise.loggedSets.push({
                         reps: '',
                         weight: '',
                         rir: exercise.rir
@@ -939,28 +986,39 @@
             const container = document.getElementById('set-editors');
             container.innerHTML = '';
             
-            exercise.sets.forEach((set, setIndex) => {
+            exercise.loggedSets.forEach((set, setIndex) => {
                 const setEditor = document.createElement('div');
                 setEditor.className = 'set-editor';
                 
                 // Get last week's data for this exercise
                 const lastWeekData = getLastWeekData(exercise.name, setIndex);
+                const lastWeekSet = getLastWeekSetData(exercise.name, setIndex);
+                
+                // Pre-populate with last week's values if available and current values are empty
+                const defaultReps = set.reps || (lastWeekSet ? lastWeekSet.reps : '');
+                const defaultWeight = set.weight || (lastWeekSet ? lastWeekSet.weight : '');
+                const defaultRir = set.rir !== undefined ? set.rir : (lastWeekSet ? lastWeekSet.rir : exercise.rir);
                 
                 setEditor.innerHTML = `
                     <div class="set-header">Set ${setIndex + 1}</div>
                     <div class="set-inputs">
                         <input type="number" class="set-input" placeholder="Reps" 
-                               value="${set.reps}" 
+                               value="${defaultReps}" 
                                onchange="updateSetData(${exerciseIndex}, ${setIndex}, 'reps', this.value)">
                         <input type="number" class="set-input" placeholder="Weight" 
-                               value="${set.weight}" 
+                               value="${defaultWeight}" 
                                onchange="updateSetData(${exerciseIndex}, ${setIndex}, 'weight', this.value)">
                         <input type="number" class="set-input" placeholder="RIR" 
-                               value="${set.rir}" 
+                               value="${defaultRir}" 
                                onchange="updateSetData(${exerciseIndex}, ${setIndex}, 'rir', this.value)">
                     </div>
                     ${lastWeekData ? `<div class="last-week-info">Last week: ${lastWeekData}</div>` : ''}
                 `;
+                
+                // Update the actual data with the defaults
+                if (defaultReps) updateSetData(exerciseIndex, setIndex, 'reps', defaultReps);
+                if (defaultWeight) updateSetData(exerciseIndex, setIndex, 'weight', defaultWeight);
+                if (defaultRir !== '') updateSetData(exerciseIndex, setIndex, 'rir', defaultRir);
                 
                 container.appendChild(setEditor);
             });
@@ -971,11 +1029,14 @@
             const lastWeek = new Date(currentWeekStart);
             lastWeek.setDate(lastWeek.getDate() - 7);
             
-            for (let completed of completedWorkouts.reverse()) {
+            // Create a copy and reverse it to search most recent first
+            const reversedCompleted = [...completedWorkouts].reverse();
+            
+            for (let completed of reversedCompleted) {
                 const completedDate = new Date(completed.date);
                 if (completedDate < currentWeekStart) {
                     for (let ex of completed.exercises) {
-                        if (ex.name === exerciseName && ex.sets[setIndex]) {
+                        if (ex.name === exerciseName && ex.sets && ex.sets[setIndex]) {
                             const set = ex.sets[setIndex];
                             return `${set.reps} reps of ${set.weight} lbs with ${set.rir} RIR`;
                         }
@@ -985,12 +1046,33 @@
             return null;
         }
 
+        function getLastWeekSetData(exerciseName, setIndex) {
+            // Find the most recent completion of this exercise and return the actual set data
+            const lastWeek = new Date(currentWeekStart);
+            lastWeek.setDate(lastWeek.getDate() - 7);
+            
+            // Create a copy and reverse it to search most recent first
+            const reversedCompleted = [...completedWorkouts].reverse();
+            
+            for (let completed of reversedCompleted) {
+                const completedDate = new Date(completed.date);
+                if (completedDate < currentWeekStart) {
+                    for (let ex of completed.exercises) {
+                        if (ex.name === exerciseName && ex.sets && ex.sets[setIndex]) {
+                            return ex.sets[setIndex];
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
         function updateSetData(exerciseIndex, setIndex, field, value) {
-            currentLogEntry.exercises[exerciseIndex].sets[setIndex][field] = value;
+            currentLogEntry.exercises[exerciseIndex].loggedSets[setIndex][field] = value;
         }
 
         function saveSetData() {
-            const exerciseIndex = document.getElementById('set-modal').getAttribute('data-exercise-index');
+            const exerciseIndex = parseInt(document.getElementById('set-modal').getAttribute('data-exercise-index'));
             currentLogEntry.exercises[exerciseIndex].completed = true;
             closeSetModal();
             renderEntryExercises();
@@ -1009,17 +1091,31 @@
                 return;
             }
             
+            // Use the date from the form, but ensure it's properly formatted
+            const dateValue = document.getElementById('entry-date').value;
+            const completedDate = new Date(dateValue + 'T00:00:00'); // Add time to avoid timezone issues
+            
             const completedWorkout = {
-                id: Date.now(),
+                id: currentLogEntry.completedWorkoutId || Date.now(), // Use existing ID if editing
                 workoutId: currentLogEntry.workout.id,
-                date: document.getElementById('entry-date').value,
+                date: completedDate.toISOString().split('T')[0], // Store as YYYY-MM-DD string
                 exercises: currentLogEntry.exercises.map(ex => ({
                     name: ex.name,
-                    sets: ex.sets
+                    sets: ex.loggedSets
                 }))
             };
             
-            completedWorkouts.push(completedWorkout);
+            if (currentLogEntry.completedWorkoutId) {
+                // Update existing completed workout
+                const index = completedWorkouts.findIndex(cw => cw.id === currentLogEntry.completedWorkoutId);
+                if (index !== -1) {
+                    completedWorkouts[index] = completedWorkout;
+                }
+            } else {
+                // Add new completed workout
+                completedWorkouts.push(completedWorkout);
+            }
+            
             saveData();
             
             // TODO: Send to Google Sheets
@@ -1052,8 +1148,30 @@
         }
 
         function viewCompletedWorkout(completed) {
-            // Show completed workout details (implement if needed)
-            console.log('View completed workout:', completed);
+            // Find the original workout template
+            const workout = workouts.find(w => w.id === completed.workoutId);
+            if (!workout) return;
+            
+            // Set up the entry for editing
+            currentLogEntry = {
+                workout: workout,
+                date: new Date(completed.date + 'T00:00:00'),
+                completedWorkoutId: completed.id, // Track which completed workout we're editing
+                exercises: workout.exercises.map(ex => {
+                    // Find the completed exercise data
+                    const completedEx = completed.exercises.find(cex => cex.name === ex.name);
+                    return {
+                        ...ex,
+                        completed: !!completedEx,
+                        loggedSets: completedEx ? completedEx.sets : []
+                    };
+                })
+            };
+            
+            showScreen('workout-entry-screen');
+            document.getElementById('entry-workout-name').value = workout.name;
+            document.getElementById('entry-date').value = completed.date;
+            renderEntryExercises();
         }
 
         // Initialize app when page loads
