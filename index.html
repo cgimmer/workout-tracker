@@ -588,12 +588,31 @@
                 workouts: workouts,
                 completedWorkouts: completedWorkouts
             };
-            // Using variables instead of localStorage for Claude.ai compatibility
-            window.workoutData = data;
+            try {
+                localStorage.setItem('workoutTrackerData', JSON.stringify(data));
+                console.log('Data saved successfully');
+            } catch (error) {
+                console.error('Failed to save data:', error);
+                // Fallback to variable storage if localStorage fails
+                window.workoutData = data;
+            }
         }
 
         function loadData() {
-            // Load from variables instead of localStorage for Claude.ai compatibility
+            try {
+                const savedData = localStorage.getItem('workoutTrackerData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    workouts = data.workouts || [];
+                    completedWorkouts = data.completedWorkouts || [];
+                    console.log('Data loaded successfully');
+                    return;
+                }
+            } catch (error) {
+                console.error('Failed to load data from localStorage:', error);
+            }
+            
+            // Fallback to variable storage or default empty data
             const data = window.workoutData || { workouts: [], completedWorkouts: [] };
             workouts = data.workouts || [];
             completedWorkouts = data.completedWorkouts || [];
